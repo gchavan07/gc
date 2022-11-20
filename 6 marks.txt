@@ -1,0 +1,184 @@
+MariaDB [(none)]> create database student2;
+Query OK, 1 row affected (0.002 sec)
+
+MariaDB [(none)]> use student2;
+Database changed
+MariaDB [student2]> create table stud_marks(roll_no int primary key,name char(10),total_marks int(10));
+Query OK, 0 rows affected (0.019 sec)
+
+MariaDB [student2]> insert into stud_marks values(101,'Laksh',933);
+Query OK, 1 row affected (0.022 sec)
+
+MariaDB [student2]> insert into stud_marks values(102,'Paddy',356);
+Query OK, 1 row affected (0.011 sec)
+
+MariaDB [student2]> insert into stud_marks values(103,'Prathmesh',450);
+Query OK, 1 row affected (0.012 sec)
+
+MariaDB [student2]> insert into stud_marks values(104,'Prajwal',675);
+Query OK, 1 row affected (0.011 sec)
+
+MariaDB [student2]> insert into stud_marks values(105,'Shubham',1500\);
+ERROR: Unknown command '\)'.
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near '\)' at line 1
+MariaDB [student2]> insert into stud_marks values(105,'Shubham',1500);
+Query OK, 1 row affected (0.003 sec)
+
+MariaDB [student2]> insert into stud_marks values(106,'Saurabh',250);
+Query OK, 1 row affected (0.036 sec)
+
+MariaDB [student2]> select * from stud_marks;
++---------+-----------+-------------+
+| roll_no | name      | total_marks |
++---------+-----------+-------------+
+|     101 | Laksh     |         933 |
+|     102 | Paddy     |         356 |
+|     103 | Prathmesh |         450 |
+|     104 | Prajwal   |         675 |
+|     105 | Shubham   |        1500 |
+|     106 | Saurabh   |         250 |
++---------+-----------+-------------+
+6 rows in set (0.010 sec)
+
+MariaDB [student2]> create table result(roll_no int,name char(30),class char(20));
+Query OK, 0 rows affected (0.018 sec)
+
+MariaDB [student2]> delimiter //
+MariaDB [student2]> create procedure proc_grade(in marks int,out class char(10))
+    -> begin
+    -> if marks<=1500 and marks>=990 then set class="DIST";
+    -> end if;
+    -> if marks<=989 and marks>=900 then set class="FC";
+    -> end if;
+    -> if marks<=899 and marks>=825 then set class="HSC";
+    -> end if;
+    -> end;
+    -> //
+Query OK, 0 rows affected (0.040 sec)
+
+MariaDB [student2]> create function find_result(roll_in int)returns int deterministic
+    -> begin
+    -> declare fmarks int;
+    -> declare grade char(10);
+    -> declare stud_name char(10);
+    -> select stud_marks.total_marks,stud_marks.name into fmarks,stud_name from
+    -> stud_marks where stud_marks.roll_no=roll_in;
+    -> call proc_grade(fmarks,@grade);
+    -> insert into result values(roll_in,stud_name,@grade);
+    -> return roll_in;
+    -> end;
+    -> //
+Query OK, 0 rows affected (0.003 sec)
+
+MariaDB [student2]> select find_result(101)//
++------------------+
+| find_result(101) |
++------------------+
+|              101 |
++------------------+
+1 row in set (0.016 sec)
+
+MariaDB [student2]> select * from result//
++---------+-------+-------+
+| roll_no | name  | class |
++---------+-------+-------+
+|     101 | Laksh | FC    |
++---------+-------+-------+
+1 row in set (0.000 sec)
+
+MariaDB [student2]> select find_result(102)//
++------------------+
+| find_result(102) |
++------------------+
+|              102 |
++------------------+
+1 row in set (0.002 sec)
+
+MariaDB [student2]> select * from result//
++---------+-------+-------+
+| roll_no | name  | class |
++---------+-------+-------+
+|     101 | Laksh | FC    |
+|     102 | Paddy | NULL  |
++---------+-------+-------+
+2 rows in set (0.000 sec)
+
+MariaDB [student2]> select find_result(104)//
++------------------+
+| find_result(104) |
++------------------+
+|              104 |
++------------------+
+1 row in set (0.037 sec)
+
+MariaDB [student2]> select * from result//
++---------+---------+-------+
+| roll_no | name    | class |
++---------+---------+-------+
+|     101 | Laksh   | FC    |
+|     102 | Paddy   | NULL  |
+|     104 | Prajwal | NULL  |
++---------+---------+-------+
+3 rows in set (0.000 sec)
+
+MariaDB [student2]> select find_result(105)//
++------------------+
+| find_result(105) |
++------------------+
+|              105 |
++------------------+
+1 row in set (0.011 sec)
+
+MariaDB [student2]> select * from result//
++---------+---------+-------+
+| roll_no | name    | class |
++---------+---------+-------+
+|     101 | Laksh   | FC    |
+|     102 | Paddy   | NULL  |
+|     104 | Prajwal | NULL  |
+|     105 | Shubham | DIST  |
++---------+---------+-------+
+4 rows in set (0.000 sec)
+
+MariaDB [student2]> select find_result(103)//
++------------------+
+| find_result(103) |
++------------------+
+|              103 |
++------------------+
+1 row in set (0.012 sec)
+
+MariaDB [student2]> select * from result//
++---------+-----------+-------+
+| roll_no | name      | class |
++---------+-----------+-------+
+|     101 | Laksh     | FC    |
+|     102 | Paddy     | NULL  |
+|     104 | Prajwal   | NULL  |
+|     105 | Shubham   | DIST  |
+|     103 | Prathmesh | NULL  |
++---------+-----------+-------+
+5 rows in set (0.000 sec)
+
+MariaDB [student2]> select find_result(106)//
++------------------+
+| find_result(106) |
++------------------+
+|              106 |
++------------------+
+1 row in set (0.002 sec)
+
+MariaDB [student2]> select * from result//
++---------+-----------+-------+
+| roll_no | name      | class |
++---------+-----------+-------+
+|     101 | Laksh     | FC    |
+|     102 | Paddy     | NULL  |
+|     104 | Prajwal   | NULL  |
+|     105 | Shubham   | DIST  |
+|     103 | Prathmesh | NULL  |
+|     106 | Saurabh   | NULL  |
++---------+-----------+-------+
+6 rows in set (0.000 sec)
+
+MariaDB [student2]>

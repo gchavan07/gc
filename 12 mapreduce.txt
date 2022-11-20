@@ -1,0 +1,80 @@
+test> use mapreduce;
+switched to db mapreduce
+mapreduce> db.createCollection('student_mark');
+{ ok: 1 }
+mapreduce> db.student_mark.insert({name : 'Nitin',class : 'TE',age : 20, marks: 45});
+DeprecationWarning: Collection.insert() is deprecated. Use insertOne, insertMany, or bulkWrite.
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId("6378aed9d5aba1d2f6dad157") }
+}
+mapreduce> db.student_mark.insert({name : 'Laksh',class : 'TE',age : 20, marks: 43});
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId("6378aeedd5aba1d2f6dad158") }
+}
+mapreduce> db.student_mark.insert({name : 'Pradeep',class : 'TE',age : 20, marks: 47});
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId("6378af05d5aba1d2f6dad159") }
+}
+mapreduce> db.student_mark.insert({name : 'Prajwal',class : 'TE',age : 21, marks: 47});
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId("6378af19d5aba1d2f6dad15a") }
+}
+mapreduce> db.student_mark.insert({name : 'Saurabh',class : 'BE',age : 21, marks: 46});
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId("6378af33d5aba1d2f6dad15b") }
+}
+mapreduce> db.student_mark.find().pretty();
+[
+  {
+    _id: ObjectId("6378aed9d5aba1d2f6dad157"),
+    name: 'Nitin',
+    class: 'TE',
+    age: 20,
+    marks: 45
+  },
+  {
+    _id: ObjectId("6378aeedd5aba1d2f6dad158"),
+    name: 'Laksh',
+    class: 'TE',
+    age: 20,
+    marks: 43
+  },
+  {
+    _id: ObjectId("6378af05d5aba1d2f6dad159"),
+    name: 'Pradeep',
+    class: 'TE',
+    age: 20,
+    marks: 47
+  },
+  {
+    _id: ObjectId("6378af19d5aba1d2f6dad15a"),
+    name: 'Prajwal',
+    class: 'TE',
+    age: 21,
+    marks: 47
+  },
+  {
+    _id: ObjectId("6378af33d5aba1d2f6dad15b"),
+    name: 'Saurabh',
+    class: 'BE',
+    age: 21,
+    marks: 46
+  }
+]
+mapreduce> var mapfunction = function(){emit(this.age,this.marks)};
+
+mapreduce> var reducefunction=function(key,value){return Array.sum(value);};
+
+mapreduce> db.student_mark.mapReduce(mapfunction,reducefunction,{'out':'new'});
+DeprecationWarning: Collection.mapReduce() is deprecated. Use an aggregation instead.
+See https://docs.mongodb.com/manual/core/map-reduce for details.
+{ result: 'new', ok: 1 }
+
+mapreduce> db.new.find().pretty();
+[ { _id: 21, value: 93 }, { _id: 20, value: 135 } ]
+mapreduce>

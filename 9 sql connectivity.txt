@@ -1,0 +1,90 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Scanner;
+
+import javax.swing.text.html.HTMLDocument.HTMLReader.PreAction;
+
+public class SQLCONNECTIVITY
+{
+	public static void main(String args[]) throws Exception
+	{
+		Scanner sn=new Scanner(System.in);
+		
+		Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+		Connection con=DriverManager.getConnection("jdbc:mysql://localhost/dell?user=root&password=root");
+		System.out.print("Connection Successful");
+		
+		String StrQuery="select * from employee";
+		String StrQuery1="insert into employee values(?,?)";
+		String StrQuery2="update employee set name=? where id=?";
+		String StrQuery3="delete from employee where id=?";
+		
+		Statement stmt=con.createStatement();
+		ResultSet rs=stmt.executeQuery(StrQuery);
+		
+		while(rs.next())
+		{
+			System.out.print("\n\tId-"+rs.getInt(1)+"\tName-"+rs.getString(2));
+		}
+		
+		System.out.print("\n\nWhich Operation You Want Perform :");
+		System.out.print("\n1.Insert");
+		System.out.print("\n2.Update");
+		System.out.print("\n3.Delete");
+		
+		System.out.print("\n\nEnter Your Choice :");
+		int ch=sn.nextInt();
+		
+		if(ch==1)
+		{
+			PreparedStatement stmt1=con.prepareStatement(StrQuery1);
+			
+			System.out.print("\nEnter Id-");
+			int id=sn.nextInt();
+			stmt1.setInt(1, id);
+			
+			System.out.print("\nEnter Name :");
+			String name=sn.next();
+			stmt1.setString(2, name);
+			
+			stmt1.executeUpdate();
+			
+			System.out.print("\nData Inserted Succesfully");
+					
+		}
+		else if(ch==2)
+		{
+			PreparedStatement stmt2=con.prepareStatement(StrQuery2);
+			
+			System.out.print("\nWhose Name You want To Update:");
+			int id=sn.nextInt();
+			stmt2.setInt(2, id);
+			
+			System.out.print("\nEnter Name :");
+			String name=sn.next();
+			stmt2.setString(1, name);
+			
+			stmt2.executeUpdate();
+			System.out.print("\nUpdated Successfully");
+		}
+		else if(ch==3)
+		{
+			System.out.println("Enter id for delete");
+
+			PreparedStatement stmt3=con.prepareStatement(StrQuery3);
+			
+			int id=sn.nextInt();
+			stmt3.setInt(1, id);
+			stmt3.executeUpdate();
+			
+			System.out.println("Deleted sucessfullyyyyy...");
+		}
+		else
+		{
+			System.out.print("\nInvalid Choice");
+		}
+	}
+}

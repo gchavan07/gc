@@ -1,0 +1,76 @@
+test> use studentt
+switched to db studentt
+studentt> db.createCollection('student')
+{ ok: 1 }
+studentt> db.student.insert({name:'summit',class:'TE',address:'Pune',age:21,fees:20000})
+DeprecationWarning: Collection.insert() is deprecated. Use insertOne, insertMany, or bulkWrite.
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId("637a02252bec04ae46db2306") }
+}
+studentt> db.student.insert({name:'vijay',class:'TE',address:'Mumbai',age:22,fees:22000})
+{
+  acknowledged: true,
+  insertedIds: { '0': ObjectId("637a023b2bec04ae46db2307") }
+}
+studentt> db.student.find()
+[
+  {
+    _id: ObjectId("637a02252bec04ae46db2306"),
+    name: 'summit',
+    class: 'TE',
+    address: 'Pune',
+    age: 21,
+    fees: 20000
+  },
+  {
+    _id: ObjectId("637a023b2bec04ae46db2307"),
+    name: 'vijay',
+    class: 'TE',
+    address: 'Mumbai',
+    age: 22,
+    fees: 22000
+  }
+]
+studentt> db.student.update({name:'summit'},{$set:{age:30}})
+DeprecationWarning: Collection.update() is deprecated. Use updateOne, updateMany, or bulkWrite.
+{
+  acknowledged: true,
+  insertedId: null,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0
+}
+studentt> db.student.find()
+[
+  {
+    _id: ObjectId("637a02252bec04ae46db2306"),
+    name: 'summit',
+    class: 'TE',
+    address: 'Pune',
+    age: 30,
+    fees: 20000
+  },
+  {
+    _id: ObjectId("637a023b2bec04ae46db2307"),
+    name: 'vijay',
+    class: 'TE',
+    address: 'Mumbai',
+    age: 22,
+    fees: 22000
+  }
+]
+studentt> db.student.remove({name:'vijay'})
+DeprecationWarning: Collection.remove() is deprecated. Use deleteOne, deleteMany, findOneAndDelete, or bulkWrite.
+{ acknowledged: true, deletedCount: 1 }
+studentt> db.student.find()
+[
+  {
+    _id: ObjectId("637a02252bec04ae46db2306"),
+    name: 'summit',
+    class: 'TE',
+    address: 'Pune',
+    age: 30,
+    fees: 20000
+  }
+]

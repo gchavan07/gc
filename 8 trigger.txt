@@ -1,0 +1,140 @@
+MariaDB [(none)]> create database trigger4;
+Query OK, 1 row affected (0.036 sec)
+
+MariaDB [(none)]> use trigger4;
+Database changed
+MariaDB [trigger4]> create table borrower(rollin int,name varchar(30),dateofissue date,nameofbook varchar(55),status char(35));
+Query OK, 0 rows affected (0.055 sec)
+
+MariaDB [trigger4]> insert into borrower values(101,'Laksh','2022-07-16','dbms','i');
+Query OK, 1 row affected (0.049 sec)
+
+MariaDB [trigger4]> insert into borrower values(102,'Paddy','2022-07-16','cns','i');;
+Query OK, 1 row affected (0.037 sec)
+
+ERROR: No query specified
+
+MariaDB [trigger4]> insert into borrower values(103,'Pratham','2022-07-20','oop','r');
+Query OK, 1 row affected (0.037 sec)
+
+MariaDB [trigger4]> insert into borrower values(104,'Saurabh','2022-07-23','spos','i');
+Query OK, 1 row affected (0.036 sec)
+
+MariaDB [trigger4]> insert into borrower values(105,'Soham','2022-07-25','spos','r');
+Query OK, 1 row affected (0.037 sec)
+
+MariaDB [trigger4]> select * from borrower;
++--------+---------+-------------+------------+--------+
+| rollin | name    | dateofissue | nameofbook | status |
++--------+---------+-------------+------------+--------+
+|    101 | Laksh   | 2022-07-16  | dbms       | i      |
+|    102 | Paddy   | 2022-07-16  | cns        | i      |
+|    103 | Pratham | 2022-07-20  | oop        | r      |
+|    104 | Saurabh | 2022-07-23  | spos       | i      |
+|    105 | Soham   | 2022-07-25  | spos       | r      |
++--------+---------+-------------+------------+--------+
+5 rows in set (0.036 sec)
+
+MariaDB [trigger4]> create table library_audit(rollin int,name varchar(30),dateofissue date,nameofbook varchar(55),status char(35),ts timestamp);
+Query OK, 0 rows affected (0.048 sec)
+
+MariaDB [trigger4]> delimiter //
+MariaDB [trigger4]> create trigger after_insert after insert on borrower for each row
+    -> begin
+    -> insert into library_audit values(new.rollin,new.name,new.dateofissue,new.nameofbook,new.status,current_timestamp);
+    -> end;
+    -> //
+Query OK, 0 rows affected (0.045 sec)
+
+MariaDB [trigger4]> insert into borrower values(106,'Nitin','2022-07-30','spm','r');
+    -> //
+Query OK, 1 row affected (0.041 sec)
+
+MariaDB [trigger4]> selct * from library_audit;
+    -> //
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'selct * from library_audit' at line 1
+MariaDB [trigger4]> select * from library_audit//
++--------+-------+-------------+------------+--------+---------------------+
+| rollin | name  | dateofissue | nameofbook | status | ts                  |
++--------+-------+-------------+------------+--------+---------------------+
+|    106 | Nitin | 2022-07-30  | spm        | r      | 2022-11-19 22:46:38 |
++--------+-------+-------------+------------+--------+---------------------+
+1 row in set (0.000 sec)
+
+MariaDB [trigger4]> select * from borrower//
++--------+---------+-------------+------------+--------+
+| rollin | name    | dateofissue | nameofbook | status |
++--------+---------+-------------+------------+--------+
+|    101 | Laksh   | 2022-07-16  | dbms       | i      |
+|    102 | Paddy   | 2022-07-16  | cns        | i      |
+|    103 | Pratham | 2022-07-20  | oop        | r      |
+|    104 | Saurabh | 2022-07-23  | spos       | i      |
+|    105 | Soham   | 2022-07-25  | spos       | r      |
+|    106 | Nitin   | 2022-07-30  | spm        | r      |
++--------+---------+-------------+------------+--------+
+6 rows in set (0.000 sec)
+
+MariaDB [trigger4]> create trigger after_delete after delete on borrower for each row
+    -> begin
+    -> insert into library_audit values(old.rollin,old.name,old.dateofissue,old.nameofbook,old.status,current_timestamp);
+    -> end
+    -> //
+Query OK, 0 rows affected (0.041 sec)
+
+MariaDB [trigger4]> delete from borrower where rollin=103 //
+Query OK, 1 row affected (0.040 sec)
+
+MariaDB [trigger4]> select * from borrower//
++--------+---------+-------------+------------+--------+
+| rollin | name    | dateofissue | nameofbook | status |
++--------+---------+-------------+------------+--------+
+|    101 | Laksh   | 2022-07-16  | dbms       | i      |
+|    102 | Paddy   | 2022-07-16  | cns        | i      |
+|    104 | Saurabh | 2022-07-23  | spos       | i      |
+|    105 | Soham   | 2022-07-25  | spos       | r      |
+|    106 | Nitin   | 2022-07-30  | spm        | r      |
++--------+---------+-------------+------------+--------+
+5 rows in set (0.000 sec)
+
+MariaDB [trigger4]> select * from library_audit//
++--------+---------+-------------+------------+--------+---------------------+
+| rollin | name    | dateofissue | nameofbook | status | ts                  |
++--------+---------+-------------+------------+--------+---------------------+
+|    106 | Nitin   | 2022-07-30  | spm        | r      | 2022-11-19 22:46:38 |
+|    103 | Pratham | 2022-07-20  | oop        | r      | 2022-11-19 22:49:28 |
++--------+---------+-------------+------------+--------+---------------------+
+2 rows in set (0.000 sec)
+
+MariaDB [trigger4]> create trigger after_update after update on borrower for each row
+    -> begin
+    -> insert into library_audit values(new.rollin,new.name,new.dateofissue,new.nameofbook,new.status,current_timestamp);
+    -> end
+    -> //
+Query OK, 0 rows affected (0.043 sec)
+
+MariaDB [trigger4]> update borrower set status='r' where borrower.rollin=104;
+    -> //
+Query OK, 1 row affected (0.041 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+MariaDB [trigger4]> select * from borrower//
++--------+---------+-------------+------------+--------+
+| rollin | name    | dateofissue | nameofbook | status |
++--------+---------+-------------+------------+--------+
+|    101 | Laksh   | 2022-07-16  | dbms       | i      |
+|    102 | Paddy   | 2022-07-16  | cns        | i      |
+|    104 | Saurabh | 2022-07-23  | spos       | r      |
+|    105 | Soham   | 2022-07-25  | spos       | r      |
+|    106 | Nitin   | 2022-07-30  | spm        | r      |
++--------+---------+-------------+------------+--------+
+5 rows in set (0.000 sec)
+
+MariaDB [trigger4]> select * from library_audit//
++--------+---------+-------------+------------+--------+---------------------+
+| rollin | name    | dateofissue | nameofbook | status | ts                  |
++--------+---------+-------------+------------+--------+---------------------+
+|    106 | Nitin   | 2022-07-30  | spm        | r      | 2022-11-19 22:46:38 |
+|    103 | Pratham | 2022-07-20  | oop        | r      | 2022-11-19 22:49:28 |
+|    104 | Saurabh | 2022-07-23  | spos       | r      | 2022-11-19 22:51:45 |
++--------+---------+-------------+------------+--------+---------------------+
+3 rows in set (0.000 sec)

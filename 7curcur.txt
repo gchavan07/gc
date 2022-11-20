@@ -1,0 +1,144 @@
+MariaDB [(none)]> create database cursor5;
+Query OK, 1 row affected (0.036 sec)
+
+MariaDB [(none)]> use cursor5;
+Database changed
+MariaDB [cursor5]> create table o_rollcall(roll_no int,name varchar(50),address varchar(50));
+Query OK, 0 rows affected (0.054 sec)
+
+MariaDB [cursor5]> insert into o_rollcall values('1','Laksh','Shirur');
+Query OK, 1 row affected (0.048 sec)
+
+MariaDB [cursor5]> insert into o_rollcall values('2','Sauri','Beed');
+Query OK, 1 row affected (0.037 sec)
+
+MariaDB [cursor5]> insert into o_rollcall values('3','Nits','Nagar');
+Query OK, 1 row affected (0.036 sec)
+
+MariaDB [cursor5]> insert into o_rollcall values('4','Paddy','Kolhapur');
+Query OK, 1 row affected (0.036 sec)
+
+MariaDB [cursor5]> insert into o_rollcall values('5','Prajwal','Jalna');
+Query OK, 1 row affected (0.002 sec)
+
+MariaDB [cursor5]> select * from o_rollcall;
++---------+---------+----------+
+| roll_no | name    | address  |
++---------+---------+----------+
+|       1 | Laksh   | Shirur   |
+|       2 | Sauri   | Beed     |
+|       3 | Nits    | Nagar    |
+|       4 | Paddy   | Kolhapur |
+|       5 | Prajwal | Jalna    |
++---------+---------+----------+
+5 rows in set (0.037 sec)
+
+MariaDB [cursor5]> create table n_rollcall(roll_no int,name varchar(50),address varchar(50));
+Query OK, 0 rows affected (0.046 sec)
+
+MariaDB [cursor5]> delimiter //
+MariaDB [cursor5]> create procedure p3(in r1 int)
+    -> begin
+    -> declare r2 int;
+    -> declare exit_loop boolean;
+    -> declare c1 cursor for select roll_no from o_rollcall where roll_no>r1;
+    -> declare continue handler for not found set exit_loop = true;
+    -> open c1;
+    -> e_loop:loop
+    -> fetch c1 into r2;
+    -> if not exists(select * from n_rollcall where roll_no=r2)
+    -> then
+    -> insert into n_rollcall select * from o_rollcall where roll_no = r2;
+    -> end if;
+    -> if exit_loop
+    -> then
+    -> close c1;
+    -> leave e_loop;
+    -> end if;
+    -> end loop e_loop;
+    -> end
+    -> //
+Query OK, 0 rows affected (0.050 sec)
+
+MariaDB [cursor5]> call p3(2);
+    -> //
+Query OK, 3 rows affected (0.049 sec)
+
+MariaDB [cursor5]> select* from n_rolcall;
+    -> //
+ERROR 1146 (42S02): Table 'cursor5.n_rolcall' doesn't exist
+MariaDB [cursor5]> select * from n_rollcall //
++---------+---------+----------+
+| roll_no | name    | address  |
++---------+---------+----------+
+|       3 | Nits    | Nagar    |
+|       4 | Paddy   | Kolhapur |
+|       5 | Prajwal | Jalna    |
++---------+---------+----------+
+3 rows in set (0.000 sec)
+
+MariaDB [cursor5]> call p3(0);
+    -> //
+Query OK, 2 rows affected (0.041 sec)
+
+MariaDB [cursor5]> select * from n_rollcall //
++---------+---------+----------+
+| roll_no | name    | address  |
++---------+---------+----------+
+|       3 | Nits    | Nagar    |
+|       4 | Paddy   | Kolhapur |
+|       5 | Prajwal | Jalna    |
+|       1 | Laksh   | Shirur   |
+|       2 | Sauri   | Beed     |
++---------+---------+----------+
+5 rows in set (0.000 sec)
+
+MariaDB [cursor5]> insert into o_rollcall values('6','Soham','Aurangabad');
+    -> //
+Query OK, 1 row affected (0.036 sec)
+
+MariaDB [cursor5]> select * from 0_rollcall //
+ERROR 1146 (42S02): Table 'cursor5.0_rollcall' doesn't exist
+MariaDB [cursor5]> select * from o_rollcall //
++---------+---------+------------+
+| roll_no | name    | address    |
++---------+---------+------------+
+|       1 | Laksh   | Shirur     |
+|       2 | Sauri   | Beed       |
+|       3 | Nits    | Nagar      |
+|       4 | Paddy   | Kolhapur   |
+|       5 | Prajwal | Jalna      |
+|       6 | Soham   | Aurangabad |
++---------+---------+------------+
+6 rows in set (0.000 sec)
+
+MariaDB [cursor5]> select * from n_rollcall //
++---------+---------+----------+
+| roll_no | name    | address  |
++---------+---------+----------+
+|       3 | Nits    | Nagar    |
+|       4 | Paddy   | Kolhapur |
+|       5 | Prajwal | Jalna    |
+|       1 | Laksh   | Shirur   |
+|       2 | Sauri   | Beed     |
++---------+---------+----------+
+5 rows in set (0.000 sec)
+
+MariaDB [cursor5]> call p3(4);
+    -> //
+Query OK, 1 row affected (0.039 sec)
+
+MariaDB [cursor5]> select * from n_rollcall //
++---------+---------+------------+
+| roll_no | name    | address    |
++---------+---------+------------+
+|       3 | Nits    | Nagar      |
+|       4 | Paddy   | Kolhapur   |
+|       5 | Prajwal | Jalna      |
+|       1 | Laksh   | Shirur     |
+|       2 | Sauri   | Beed       |
+|       6 | Soham   | Aurangabad |
++---------+---------+------------+
+6 rows in set (0.000 sec)
+
+MariaDB [cursor5]>

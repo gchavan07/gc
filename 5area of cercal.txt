@@ -1,0 +1,54 @@
+MariaDB [(none)]> create database area;
+Query OK, 1 row affected (0.001 sec)
+
+MariaDB [(none)]> use area;
+Database changed
+MariaDB [area]> create table AreaCircle(radius float, area float(6));
+Query OK, 0 rows affected (0.019 sec)
+
+MariaDB [area]> delimiter //
+MariaDB [area]> create procedure CalCircleArea(IN rad float)
+    -> begin
+    -> declare radiusBound condition for sqlstate '45000';
+    -> if(rad>9 || rad<5)
+    -> then
+    -> signal sqlstate '45000' set message_text = 'radius is not between 5 and 9';
+    -> else insert into AreaCircle values(rad, 3.14*rad*rad);
+    -> end if;
+    -> end
+    -> //
+Query OK, 0 rows affected (0.021 sec)
+
+MariaDB [area]> call CalCircleArea(4.87);
+    -> //
+ERROR 1644 (45000): radius is not between 5 and 9
+MariaDB [area]> call CalCircleArea(6.87) //
+Query OK, 1 row affected (0.015 sec)
+
+
+
+MariaDB [area]> select * from area;
+    -> //
+ERROR 1146 (42S02): Table 'area.area' doesn't exist
+MariaDB [area]> select * from AreaCircle;
+    -> //
++--------+---------+
+| radius | area    |
++--------+---------+
+|   6.87 | 148.198 |
++--------+---------+
+1 row in set (0.000 sec)
+
+MariaDB [area]> call CalCircleArea(4.87)//
+ERROR 1644 (45000): radius is not between 5 and 9
+MariaDB [area]> call CalCircleArea(5.87)//
+Query OK, 1 row affected (0.037 sec)
+
+MariaDB [area]> select * from AreaCircle//
++--------+---------+
+| radius | area    |
++--------+---------+
+|   6.87 | 148.198 |
+|   5.87 | 108.195 |
++--------+---------+
+2 rows in set (0.000 sec)
